@@ -19,38 +19,23 @@ body {
 header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 16px;
-  gap: 12px;
+  align-items: center;
+  margin-bottom: 18px;
 }
 
-.header-left h1 {
-  font-size: 19px;
-  font-weight: 700;
-  letter-spacing: -0.3px;
-}
+.header-left { display: flex; flex-direction: column; gap: 8px; }
+.header-left h1 { font-size: 19px; font-weight: 700; letter-spacing: -0.3px; }
+.header-left .subtitle { font-size: 12px; color: #8e8e93; }
 
-.header-left .subtitle {
-  font-size: 12px;
-  color: #8e8e93;
-  margin-top: 2px;
-}
+.header-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 
-.header-right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 6px;
-  flex-shrink: 0;
-}
-
+/* Segmented mode toggle */
 .mode-toggle {
   display: flex;
   background: #e5e5ea;
   border-radius: 9px;
   padding: 2px;
 }
-
 .mode-btn {
   padding: 5px 12px;
   border-radius: 7px;
@@ -61,8 +46,8 @@ header {
   cursor: pointer;
   color: #8e8e93;
   transition: all 0.15s;
+  white-space: nowrap;
 }
-
 .mode-btn.active {
   background: white;
   color: #1c1c1e;
@@ -80,16 +65,19 @@ header {
   color: #1c1c1e;
   transition: background 0.15s;
 }
-.refresh-btn:hover { background: #e5e5ea; }
-.refresh-btn.spinning { opacity: 0.6; pointer-events: none; }
+.refresh-btn:hover  { background: #e5e5ea; }
+.refresh-btn:active { background: #d1d1d6; }
+.refresh-btn:disabled { opacity: 0.5; pointer-events: none; }
 
+/* Leg sections */
+.leg { margin-bottom: 20px; }
 .leg-label {
   font-size: 11px;
-  font-weight: 600;
-  color: #8e8e93;
+  font-weight: 700;
+  letter-spacing: 0.6px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin: 14px 0 8px;
+  color: #8e8e93;
+  margin-bottom: 8px;
 }
 
 .cards {
@@ -97,10 +85,7 @@ header {
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
 }
-
-@media (max-width: 640px) {
-  .cards { grid-template-columns: 1fr; }
-}
+@media (max-width: 640px) { .cards { grid-template-columns: 1fr; } }
 
 .card {
   background: white;
@@ -130,18 +115,39 @@ header {
   letter-spacing: 0.2px;
 }
 
-.card-info .route-name {
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1.2;
-}
+.card-info .route-name { font-size: 14px; font-weight: 600; line-height: 1.2; }
+.card-info .stop-name  { font-size: 11.5px; color: #8e8e93; margin-top: 2px; line-height: 1.3; }
 
-.card-info .stop-name {
+.feed-banner {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
   font-size: 11.5px;
-  color: #8e8e93;
-  margin-top: 2px;
-  line-height: 1.3;
+  font-weight: 500;
+  border-bottom: 1px solid transparent;
 }
+.feed-banner.retrying {
+  display: flex;
+  background: #fff8ec;
+  border-color: #ffe0a3;
+  color: #7a4f00;
+}
+.feed-banner.lost {
+  display: flex;
+  background: #fff3f3;
+  border-color: #ffd0d0;
+  color: #9a1c1c;
+}
+.feed-banner .spinner {
+  width: 10px; height: 10px;
+  border: 2px solid #ffc44d;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 
 .dep-row {
   display: flex;
@@ -153,78 +159,53 @@ header {
 .dep-row:last-child { border-bottom: none; }
 .dep-row.no-gps { opacity: 0.55; }
 
-.min-block {
-  min-width: 48px;
-  text-align: right;
-  flex-shrink: 0;
-}
+.min-block { min-width: 52px; text-align: right; flex-shrink: 0; }
 
 .min-val {
   font-size: 26px;
-  font-weight: 700;
+  font-weight: 900;
   line-height: 1;
   letter-spacing: -0.5px;
   font-variant-numeric: tabular-nums;
 }
-
-.min-unit {
-  font-size: 11px;
-  color: #8e8e93;
-  font-weight: 500;
-  margin-top: 1px;
-  text-align: right;
-}
+.min-unit { font-size: 13px; color: #8e8e93; font-weight: 500; margin-top: 1px; text-align: right; }
 
 .dep-detail { flex: 1; }
 
 .sched-time {
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 500;
   color: #3a3a3c;
   font-variant-numeric: tabular-nums;
 }
 
-.delay-tag {
-  font-size: 11.5px;
-  margin-top: 2px;
-  font-weight: 500;
-}
+.delay-tag { font-size: 13px; margin-top: 3px; font-weight: 500; }
 .delay-tag.late   { color: #FF2D55; }
 .delay-tag.early  { color: #007AFF; }
 .delay-tag.ontime { color: #8e8e93; }
 .delay-tag.sched  { color: #aeaeb2; }
 
-.min-now   { color: #FF2D55; }
-.min-soon  { color: #ff9f0a; }
-.min-later { color: #1c1c1e; }
-
 .gps-block {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
+  align-items: center;
+  gap: 5px;
   flex-shrink: 0;
   min-width: 32px;
 }
 
-.gps-tag {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  text-align: right;
-}
+.occ-pills { display: flex; gap: 2px; align-items: center; }
+.occ-pill  { width: 8px; height: 5px; border-radius: 2.5px; flex-shrink: 0; }
+.occ-pill.empty { background: #e5e5ea; }
+
+.gps-tag { font-size: 12px; font-weight: 700; letter-spacing: 0.5px; }
 .gps-tag.live    { color: #30d158; }
 .gps-tag.inbound { color: #30d158; }
 .gps-tag.sched   { color: #aeaeb2; text-decoration: line-through; }
 
-.occ-pills { display: flex; gap: 2px; align-items: center; }
-.occ-pill {
-  width: 8px;
-  height: 5px;
-  border-radius: 2.5px;
-  flex-shrink: 0;
-}
-.occ-pill.empty { background: #e5e5ea; }
+.min-now   { color: #FF2D55; }
+.min-soon  { color: #ff9f0a; }
+.min-later { color: #1c1c1e; }
 
 .state-msg {
   padding: 22px 14px;
@@ -233,8 +214,6 @@ header {
   color: #8e8e93;
 }
 .state-msg.error { color: #ff3b30; }
-
-#mode-home { display: none; }
 
 footer {
   margin-top: 14px;
@@ -248,25 +227,23 @@ footer {
 }
 
 .pulse-dot {
-  width: 6px;
-  height: 6px;
+  width: 6px; height: 6px;
   border-radius: 50%;
   background: #30d158;
-  animation: pulse 2.5s ease-in-out infinite;
   flex-shrink: 0;
 }
+.pulse-dot.active { animation: pulse 2.5s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
-}
+/* Mode containers */
+#mode-home { display: none; }
 </style>
 </head>
 <body>
 
 <header>
   <div class="header-left">
-    <h1>Live Commute</h1>
+    <h1>Morning Commute</h1>
     <div class="subtitle" id="subtitle">Ballard → Downtown → Capitol Hill</div>
   </div>
   <div class="header-right">
@@ -278,148 +255,190 @@ footer {
   </div>
 </header>
 
+<!-- ══ TO WORK ══════════════════════════════════════════════════ -->
 <div id="mode-work">
-  <div class="leg-label">Leg 1 — Ballard to Downtown</div>
-  <div class="cards">
-    <div class="card">
-      <div class="card-header">
-        <span class="route-badge" style="background:#831523;color:#fff;">D Line</span>
-        <div class="card-info">
-          <div class="route-name">RapidRide D</div>
-          <div class="stop-name">15th Ave NW &amp; NW Market St</div>
+
+  <div class="leg">
+    <div class="leg-label">Ballard → Downtown</div>
+    <div class="cards">
+
+      <div class="card">
+        <div class="card-header">
+          <span class="route-badge" style="background:#831523;color:#fff;">D Line</span>
+          <div class="card-info">
+            <div class="route-name">RapidRide D</div>
+            <div class="stop-name">15th Ave NW &amp; NW Market St</div>
+          </div>
         </div>
+        <div class="feed-banner" id="banner-d"></div>
+        <div id="deps-d"><div class="state-msg">Loading…</div></div>
       </div>
-      <div id="deps-d"><div class="state-msg">Loading…</div></div>
-    </div>
-    <div class="card">
-      <div class="card-header">
-        <span class="route-badge" style="background:#1C6050;color:#fff;">40</span>
-        <div class="card-info">
-          <div class="route-name">Route 40</div>
-          <div class="stop-name">Leary Ave NW &amp; NW Dock Pl</div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="route-badge" style="background:#1C6050;color:#fff;">40</span>
+          <div class="card-info">
+            <div class="route-name">Route 40</div>
+            <div class="stop-name">Leary Ave NW &amp; NW Dock Pl</div>
+          </div>
         </div>
+        <div class="feed-banner" id="banner-40"></div>
+        <div id="deps-40"><div class="state-msg">Loading…</div></div>
       </div>
-      <div id="deps-40"><div class="state-msg">Loading…</div></div>
-    </div>
-    <div class="card">
-      <div class="card-header">
-        <span class="route-badge" style="background:#1C6050;color:#fff;">17X</span>
-        <div class="card-info">
-          <div class="route-name">Route 17X</div>
-          <div class="stop-name">15th Ave NW &amp; NW Leary Way</div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="route-badge" style="background:#1C6050;color:#fff;">17X</span>
+          <div class="card-info">
+            <div class="route-name">Route 17X</div>
+            <div class="stop-name">15th Ave NW &amp; NW Leary Way</div>
+          </div>
         </div>
+        <div class="feed-banner" id="banner-17"></div>
+        <div id="deps-17"><div class="state-msg">Loading…</div></div>
       </div>
-      <div id="deps-17"><div class="state-msg">Loading…</div></div>
+
     </div>
   </div>
 
-  <div class="leg-label">Leg 2 — Downtown to Capitol Hill</div>
-  <div class="cards">
-    <div class="card">
-      <div class="card-header">
-        <span class="route-badge" style="background:#1C6050;color:#fff;">10</span>
-        <div class="card-info">
-          <div class="route-name">Route 10</div>
-          <div class="stop-name">3rd Ave &amp; Pike St</div>
+  <div class="leg">
+    <div class="leg-label">Downtown → Capitol Hill</div>
+    <div class="cards">
+
+      <div class="card">
+        <div class="card-header">
+          <span class="route-badge" style="background:#1C6050;color:#fff;">10</span>
+          <div class="card-info">
+            <div class="route-name">Route 10</div>
+            <div class="stop-name">Pike St &amp; 4th Ave</div>
+          </div>
         </div>
+        <div class="feed-banner" id="banner-10"></div>
+        <div id="deps-10"><div class="state-msg">Loading…</div></div>
       </div>
-      <div id="deps-10"><div class="state-msg">Loading…</div></div>
-    </div>
-    <div class="card">
-      <div class="card-header">
-        <span class="route-badge" style="background:#1C6050;color:#fff;">12</span>
-        <div class="card-info">
-          <div class="route-name">Route 12</div>
-          <div class="stop-name">3rd Ave &amp; Pike St</div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="route-badge" style="background:#1C6050;color:#fff;">12</span>
+          <div class="card-info">
+            <div class="route-name">Route 12</div>
+            <div class="stop-name">Pike St &amp; 4th Ave</div>
+          </div>
         </div>
+        <div class="feed-banner" id="banner-12"></div>
+        <div id="deps-12"><div class="state-msg">Loading…</div></div>
       </div>
-      <div id="deps-12"><div class="state-msg">Loading…</div></div>
-    </div>
-    <div class="card">
-      <div class="card-header">
-        <span class="route-badge" style="background:#831523;color:#fff;">G Line</span>
-        <div class="card-info">
-          <div class="route-name">RapidRide G</div>
-          <div class="stop-name">Spring St &amp; 3rd Ave</div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="route-badge" style="background:#831523;color:#fff;">G Line</span>
+          <div class="card-info">
+            <div class="route-name">RapidRide G</div>
+            <div class="stop-name">Spring St &amp; 3rd Ave</div>
+          </div>
         </div>
+        <div class="feed-banner" id="banner-g"></div>
+        <div id="deps-g"><div class="state-msg">Loading…</div></div>
       </div>
-      <div id="deps-g"><div class="state-msg">Loading…</div></div>
+
     </div>
   </div>
-</div>
 
+</div><!-- /mode-work -->
+
+<!-- ══ TO HOME ══════════════════════════════════════════════════ -->
 <div id="mode-home">
-  <div class="leg-label">Leg 1 — Capitol Hill to Downtown</div>
-  <div class="cards">
-    <div class="card">
-      <div class="card-header">
-        <span class="route-badge" style="background:#1C6050;color:#fff;">10</span>
-        <div class="card-info">
-          <div class="route-name">Route 10</div>
-          <div class="stop-name">13th Ave &amp; E Pine St</div>
+
+  <div class="leg">
+    <div class="leg-label">Capitol Hill → Downtown</div>
+    <div class="cards">
+
+      <div class="card">
+        <div class="card-header">
+          <span class="route-badge" style="background:#1C6050;color:#fff;">10</span>
+          <div class="card-info">
+            <div class="route-name">Route 10</div>
+            <div class="stop-name">E Pine St &amp; 13th Ave</div>
+          </div>
         </div>
+        <div class="feed-banner" id="banner-h10"></div>
+        <div id="deps-h10"><div class="state-msg">Loading…</div></div>
       </div>
-      <div id="deps-h10"><div class="state-msg">Loading…</div></div>
-    </div>
-    <div class="card">
-      <div class="card-header">
-        <span class="route-badge" style="background:#1C6050;color:#fff;">12</span>
-        <div class="card-info">
-          <div class="route-name">Route 12</div>
-          <div class="stop-name">13th Ave &amp; E Pine St</div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="route-badge" style="background:#1C6050;color:#fff;">12</span>
+          <div class="card-info">
+            <div class="route-name">Route 12</div>
+            <div class="stop-name">E Pine St &amp; 13th Ave</div>
+          </div>
         </div>
+        <div class="feed-banner" id="banner-h12"></div>
+        <div id="deps-h12"><div class="state-msg">Loading…</div></div>
       </div>
-      <div id="deps-h12"><div class="state-msg">Loading…</div></div>
-    </div>
-    <div class="card">
-      <div class="card-header">
-        <span class="route-badge" style="background:#831523;color:#fff;">G Line</span>
-        <div class="card-info">
-          <div class="route-name">RapidRide G</div>
-          <div class="stop-name">E Madison St &amp; 12th Ave</div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="route-badge" style="background:#831523;color:#fff;">G Line</span>
+          <div class="card-info">
+            <div class="route-name">RapidRide G</div>
+            <div class="stop-name">E Madison St &amp; 12th Ave</div>
+          </div>
         </div>
+        <div class="feed-banner" id="banner-hg"></div>
+        <div id="deps-hg"><div class="state-msg">Loading…</div></div>
       </div>
-      <div id="deps-hg"><div class="state-msg">Loading…</div></div>
+
     </div>
   </div>
 
-  <div class="leg-label">Leg 2 — Downtown to Ballard</div>
-  <div class="cards">
-    <div class="card">
-      <div class="card-header">
-        <span class="route-badge" style="background:#831523;color:#fff;">D Line</span>
-        <div class="card-info">
-          <div class="route-name">RapidRide D</div>
-          <div class="stop-name">3rd Ave &amp; Pike St</div>
+  <div class="leg">
+    <div class="leg-label">Downtown → Ballard</div>
+    <div class="cards">
+
+      <div class="card">
+        <div class="card-header">
+          <span class="route-badge" style="background:#831523;color:#fff;">D Line</span>
+          <div class="card-info">
+            <div class="route-name">RapidRide D</div>
+            <div class="stop-name">3rd Ave &amp; Pike St</div>
+          </div>
         </div>
+        <div class="feed-banner" id="banner-hd"></div>
+        <div id="deps-hd"><div class="state-msg">Loading…</div></div>
       </div>
-      <div id="deps-hd"><div class="state-msg">Loading…</div></div>
-    </div>
-    <div class="card">
-      <div class="card-header">
-        <span class="route-badge" style="background:#1C6050;color:#fff;">40</span>
-        <div class="card-info">
-          <div class="route-name">Route 40</div>
-          <div class="stop-name">3rd Ave &amp; Pine St</div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="route-badge" style="background:#1C6050;color:#fff;">40</span>
+          <div class="card-info">
+            <div class="route-name">Route 40</div>
+            <div class="stop-name">3rd Ave &amp; Pine St</div>
+          </div>
         </div>
+        <div class="feed-banner" id="banner-h40"></div>
+        <div id="deps-h40"><div class="state-msg">Loading…</div></div>
       </div>
-      <div id="deps-h40"><div class="state-msg">Loading…</div></div>
-    </div>
-    <div class="card">
-      <div class="card-header">
-        <span class="route-badge" style="background:#1C6050;color:#fff;">17X</span>
-        <div class="card-info">
-          <div class="route-name">Route 17X</div>
-          <div class="stop-name">3rd Ave &amp; Pine St</div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="route-badge" style="background:#1C6050;color:#fff;">17X</span>
+          <div class="card-info">
+            <div class="route-name">Route 17X</div>
+            <div class="stop-name">3rd Ave &amp; Pine St</div>
+          </div>
         </div>
+        <div class="feed-banner" id="banner-h17"></div>
+        <div id="deps-h17"><div class="state-msg">Loading…</div></div>
       </div>
-      <div id="deps-h17"><div class="state-msg">Loading…</div></div>
+
     </div>
   </div>
-</div>
+
+</div><!-- /mode-home -->
 
 <footer>
-  <div class="pulse-dot"></div>
+  <div class="pulse-dot" id="pulse-dot"></div>
   <span id="status-text">Fetching live data…</span>
 </footer>
 
@@ -431,37 +450,64 @@ const RETRY_MS    = 5000;
 const POLL_MS     = 30000;
 
 const STOPS_WORK = [
+  // Leg 1 — Ballard → Downtown
   { id: 'd',  stopId: '1_13721', filter: a => a.routeShortName === 'D Line' },
   { id: '40', stopId: '1_18151', filter: a => a.routeShortName === '40'     },
   { id: '17', stopId: '1_13760', filter: a => a.routeShortName === '17'     },
+  // Leg 2 — Downtown → Capitol Hill
   { id: '10', stopId: '1_1180',  filter: a => a.routeShortName === '10'     },
   { id: '12', stopId: '1_1180',  filter: a => a.routeShortName === '12'     },
   { id: 'g',  stopId: '1_101',   filter: a => a.routeShortName === 'G Line' },
 ];
 
 const STOPS_HOME = [
+  // Leg 1 — Capitol Hill → Downtown
   { id: 'h10', stopId: '1_11490', filter: a => a.routeShortName === '10'     },
   { id: 'h12', stopId: '1_11490', filter: a => a.routeShortName === '12'     },
   { id: 'hg',  stopId: '1_124',   filter: a => a.routeShortName === 'G Line' },
+  // Leg 2 — Downtown → Ballard
   { id: 'hd',  stopId: '1_575',   filter: a => a.routeShortName === 'D Line' },
   { id: 'h40', stopId: '1_590',   filter: a => a.routeShortName === '40'     },
   { id: 'h17', stopId: '1_590',   filter: a => a.routeShortName === '17'     },
 ];
 
+// Per-stop state keyed by stop id
+const S = {};
+[...STOPS_WORK, ...STOPS_HOME].forEach(s => {
+  S[s.id] = { data: null, retries: 0, timer: null };
+});
+
 let currentMode = 'work';
 let pollTimer   = null;
 
-const S = {};
-[...STOPS_WORK, ...STOPS_HOME].forEach(s => S[s.id] = { timer: null, retries: 0 });
+// ── Mode switching ────────────────────────────────────────────────
 
-function minsAway(ms, now) {
-  return Math.round((ms - now) / 60000);
+function setMode(mode) {
+  if (mode === currentMode) return;
+  currentMode = mode;
+
+  document.getElementById('mode-work').style.display = mode === 'work' ? 'block' : 'none';
+  document.getElementById('mode-home').style.display = mode === 'home' ? 'block' : 'none';
+  document.getElementById('btn-work').classList.toggle('active', mode === 'work');
+  document.getElementById('btn-home').classList.toggle('active', mode === 'home');
+  document.getElementById('subtitle').textContent = mode === 'work'
+    ? 'Ballard → Downtown → Capitol Hill'
+    : 'Capitol Hill → Downtown → Ballard';
+
+  // Cancel retry timers for the mode we're leaving
+  const leaving = mode === 'work' ? STOPS_HOME : STOPS_WORK;
+  leaving.forEach(stop => {
+    const s = S[stop.id];
+    if (s.timer) { clearTimeout(s.timer); s.timer = null; }
+  });
+
+  fetchAll();
 }
 
+// ── Rendering ────────────────────────────────────────────────────
+
 function fmtTime(ms) {
-  return new Date(ms).toLocaleTimeString('en-US', {
-    hour: 'numeric', minute: '2-digit', hour12: true
-  });
+  return new Date(ms).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
 }
 
 function occupancyPills(a) {
@@ -471,12 +517,12 @@ function occupancyPills(a) {
   let filled, color;
   switch (status) {
     case 'EMPTY':
-    case 'MANY_SEATS_AVAILABLE':       filled = 1; color = '#30d158'; break;
-    case 'FEW_SEATS_AVAILABLE':        filled = 2; color = '#ff9f0a'; break;
+    case 'MANY_SEATS_AVAILABLE':      filled = 1; color = '#30d158'; break;
+    case 'FEW_SEATS_AVAILABLE':       filled = 2; color = '#ff9f0a'; break;
     case 'STANDING_ROOM_ONLY':
     case 'CRUSHED_STANDING_ROOM_ONLY':
     case 'FULL':
-    case 'NOT_ACCEPTING_PASSENGERS':   filled = 3; color = '#ff3b30'; break;
+    case 'NOT_ACCEPTING_PASSENGERS':  filled = 3; color = '#ff3b30'; break;
     default: return '';
   }
   if (isHistorical) color = '#8e8e93';
@@ -486,14 +532,31 @@ function occupancyPills(a) {
   return `<div class="occ-pills">${pills}</div>`;
 }
 
-function renderDeps(id, arrivals, now) {
-  const el = document.getElementById('deps-' + id);
-  if (!arrivals.length) {
+function renderDeps(id, arrivals) {
+  const now = Date.now();
+  const el  = document.getElementById('deps-' + id);
+
+  const seen = new Map();
+  for (const a of arrivals) {
+    const existing = seen.get(a.tripId);
+    if (!existing || (a.predicted && !existing.predicted)) {
+      seen.set(a.tripId, a);
+    }
+  }
+  const deduped = Array.from(seen.values());
+
+  const upcoming = deduped.filter(a => {
+    const useMs = (a.predicted && a.predictedDepartureTime > 0)
+      ? a.predictedDepartureTime : a.scheduledDepartureTime;
+    return useMs - now > -120000;
+  }).slice(0, 4);
+
+  if (!upcoming.length) {
     el.innerHTML = '<div class="state-msg">No upcoming trips in the next 90 min</div>';
     return;
   }
 
-  const rows = arrivals.slice(0, 4).map(a => {
+  el.innerHTML = upcoming.map(a => {
     const devSec = (a.tripStatus && a.tripStatus.scheduleDeviation) || 0;
     const devMin = Math.round(devSec / 60);
 
@@ -509,32 +572,19 @@ function renderDeps(id, arrivals, now) {
       && a.tripStatus
       && a.tripStatus.activeTripId !== a.tripId;
 
-    const timeMs = isLive
-      ? a.predictedDepartureTime
-      : isInbound
-        ? a.scheduledDepartureTime + devSec * 1000
-        : a.scheduledDepartureTime;
+    let useMs;
+    if (isLive) {
+      useMs = a.predictedDepartureTime;
+    } else if (isInbound) {
+      useMs = a.scheduledDepartureTime + devSec * 1000;
+    } else {
+      useMs = a.scheduledDepartureTime;
+    }
 
-    const mins       = minsAway(timeMs, now);
-    const minClass   = mins <= 1 ? 'min-now' : mins <= 6 ? 'min-soon' : 'min-later';
+    const mins       = Math.round((useMs - now) / 60000);
+    const minClass   = mins <= 4 ? 'min-now' : mins <= 10 ? 'min-soon' : 'min-later';
     const minDisplay = mins <= 0 ? 'Now' : String(mins);
     const minUnit    = mins <= 0 ? '' : 'min';
-
-    let gpsClass, delayHtml;
-    if (isLive) {
-      gpsClass = 'live';
-      if (Math.abs(devMin) <= 1)  delayHtml = '<div class="delay-tag ontime">On time</div>';
-      else if (devMin > 1)        delayHtml = `<div class="delay-tag late">+${devMin} min late</div>`;
-      else                        delayHtml = `<div class="delay-tag early">${Math.abs(devMin)} min early</div>`;
-    } else if (isInbound) {
-      gpsClass = 'inbound';
-      if (Math.abs(devMin) <= 1)  delayHtml = '<div class="delay-tag ontime">Inbound</div>';
-      else if (devMin > 1)        delayHtml = `<div class="delay-tag late">+${devMin} min inbound</div>`;
-      else                        delayHtml = `<div class="delay-tag early">${Math.abs(devMin)} min early inbound</div>`;
-    } else {
-      gpsClass = 'sched';
-      delayHtml = '<div class="delay-tag sched">Scheduled</div>';
-    }
 
     const timeDisplay = isLive
       ? fmtTime(a.predictedDepartureTime)
@@ -542,10 +592,32 @@ function renderDeps(id, arrivals, now) {
         ? '~' + fmtTime(a.scheduledDepartureTime + devSec * 1000)
         : fmtTime(a.scheduledDepartureTime);
 
-    const noGps = gpsClass === 'sched' && mins > 1;
+    let delayHtml, gpsClass;
+    if (isLive) {
+      gpsClass = 'live';
+      if (Math.abs(devMin) <= 1) {
+        delayHtml = '<div class="delay-tag ontime">On time</div>';
+      } else if (devMin > 1) {
+        delayHtml = `<div class="delay-tag late">+${devMin} min late</div>`;
+      } else {
+        delayHtml = `<div class="delay-tag early">${Math.abs(devMin)} min early</div>`;
+      }
+    } else if (isInbound) {
+      gpsClass = 'inbound';
+      if (Math.abs(devMin) <= 1) {
+        delayHtml = '<div class="delay-tag ontime">Inbound</div>';
+      } else if (devMin > 1) {
+        delayHtml = `<div class="delay-tag late">+${devMin} min inbound</div>`;
+      } else {
+        delayHtml = `<div class="delay-tag early">${Math.abs(devMin)} min early inbound</div>`;
+      }
+    } else {
+      gpsClass = 'sched';
+      delayHtml = '<div class="delay-tag sched">Scheduled</div>';
+    }
 
     return `
-      <div class="dep-row${noGps ? ' no-gps' : ''}">
+      <div class="dep-row${gpsClass === 'sched' && mins > 1 ? ' no-gps' : ''}">
         <div class="min-block">
           <div class="min-val ${minClass}">${minDisplay}</div>
           <div class="min-unit">${minUnit}</div>
@@ -560,65 +632,89 @@ function renderDeps(id, arrivals, now) {
         </div>
       </div>`;
   }).join('');
-
-  el.innerHTML = rows;
 }
 
-async function fetchStop(stop) {
+function setBanner(id, type, attempt) {
+  const el = document.getElementById('banner-' + id);
+  el.className = 'feed-banner';
+  if (!type) { el.style.display = 'none'; el.innerHTML = ''; return; }
+
+  if (type === 'retrying') {
+    el.classList.add('retrying');
+    el.innerHTML = `<div class="spinner"></div> Feed interrupted · retrying (${attempt}/${MAX_RETRIES})`;
+  } else {
+    el.classList.add('lost');
+    el.innerHTML = '⚠ Feed lost · showing last known data';
+  }
+}
+
+// ── Fetch with per-stop retry logic ──────────────────────────────
+
+async function fetchStop(stop, isRetry) {
   const s = S[stop.id];
-  try {
-    const url = `${OBA}/arrivals-and-departures-for-stop/${stop.stopId}.json?key=${KEY}&minutesBefore=0&minutesAfter=90`;
-    const resp = await fetch(url);
-    const json = await resp.json();
-    const now  = json.currentTime;
-    const deps = json.data.entry.arrivalsAndDepartures.filter(stop.filter);
-    renderDeps(stop.id, deps, now);
+
+  if (!isRetry) {
+    if (s.timer) { clearTimeout(s.timer); s.timer = null; }
     s.retries = 0;
+    setBanner(stop.id, null);
+  }
+
+  try {
+    const url = `${OBA}/arrivals-and-departures-for-stop/${stop.stopId}.json` +
+                `?key=${KEY}&minutesBefore=0&minutesAfter=90`;
+    const res  = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
+
+    s.data    = json.data.entry.arrivalsAndDepartures.filter(stop.filter);
+    s.retries = 0;
+    setBanner(stop.id, null);
+    renderDeps(stop.id, s.data);
+
   } catch (e) {
     s.retries++;
+
     if (s.retries < MAX_RETRIES) {
-      s.timer = setTimeout(() => fetchStop(stop), RETRY_MS);
+      setBanner(stop.id, 'retrying', s.retries);
+      if (s.data) renderDeps(stop.id, s.data);
+      s.timer = setTimeout(() => fetchStop(stop, true), RETRY_MS);
     } else {
-      document.getElementById('deps-' + stop.id).innerHTML =
-        '<div class="state-msg error">Failed to load — check connection</div>';
+      if (s.data) {
+        setBanner(stop.id, 'lost');
+        renderDeps(stop.id, s.data);
+      } else {
+        setBanner(stop.id, null);
+        document.getElementById('deps-' + stop.id).innerHTML =
+          '<div class="state-msg error">Could not load · check connection</div>';
+      }
     }
   }
 }
 
-function setMode(mode) {
-  if (mode === currentMode) return;
-  currentMode = mode;
-  document.getElementById('mode-work').style.display = mode === 'work' ? 'block' : 'none';
-  document.getElementById('mode-home').style.display = mode === 'home' ? 'block' : 'none';
-  document.getElementById('btn-work').classList.toggle('active', mode === 'work');
-  document.getElementById('btn-home').classList.toggle('active', mode === 'home');
-  document.getElementById('subtitle').textContent = mode === 'work'
-    ? 'Ballard → Downtown → Capitol Hill'
-    : 'Capitol Hill → Downtown → Ballard';
-  const leaving = mode === 'work' ? STOPS_HOME : STOPS_WORK;
-  leaving.forEach(stop => {
-    const s = S[stop.id];
-    if (s.timer) { clearTimeout(s.timer); s.timer = null; }
-  });
-  fetchAll();
-}
+// ── Global refresh ────────────────────────────────────────────────
 
 async function fetchAll() {
-  const btn = document.getElementById('refresh-btn');
-  btn.classList.add('spinning');
-  btn.textContent = '↻ Refreshing…';
-
+  const btn   = document.getElementById('refresh-btn');
+  const dot   = document.getElementById('pulse-dot');
   const stops = currentMode === 'work' ? STOPS_WORK : STOPS_HOME;
-  await Promise.all(stops.map(stop => fetchStop(stop)));
 
-  btn.classList.remove('spinning');
+  btn.disabled = true;
+  btn.textContent = '↻ Refreshing…';
+  dot.classList.remove('active');
+  document.getElementById('status-text').textContent = 'Refreshing…';
+
+  await Promise.allSettled(stops.map(s => fetchStop(s, false)));
+
+  btn.disabled = false;
   btn.textContent = '↻ Refresh';
+  dot.classList.add('active');
 
   const t = new Date().toLocaleTimeString('en-US', {
     hour: 'numeric', minute: '2-digit', second: '2-digit'
   });
   document.getElementById('status-text').textContent = `Live · Updated ${t}`;
 
+  // Reset poll timer so it always counts from the last fetch
   if (pollTimer) clearInterval(pollTimer);
   pollTimer = setInterval(fetchAll, POLL_MS);
 }
