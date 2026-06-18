@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Live Commute</title>
+<style>
+:root { color-scheme: light; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #f2f2f7;
+  color: #1c1c1e;
+  padding: 16px;
+  min-height: 100vh;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.header-left { display: flex; flex-direction: column; gap: 8px; }
+.header-left h1 { font-size: 19px; font-weight: 700; letter-spacing: -0.3px; }
+.header-left .subtitle { font-size: 12px; color: #8e8e93; }
+
+.header-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+/* Segmented mode toggle */
+.mode-toggle {
+  display: flex;
+  background: #e5e5ea;
+  border-radius: 9px;
+  padding: 2px;
+}
+.mode-btn {
+  padding: 5px 12px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 500;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #8e8e93;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.mode-btn.active {
+  background: white;
+  color: #1c1c1e;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+
+.refresh-btn {
+  background: white;
+  border: 1px solid #d1d1d6;
+  border-radius: 9px;
+  padding: 6px 13px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  color: #1c1c1e;
+  transition: background 0.15s;
+}
+.refresh-btn:hover  { background: #e5e5ea; }
+.refresh-btn:active { background: #d1d1d6; }
+.refresh-btn:disabled { opacity: 0.5; pointer-events: none; }
+
+/* Leg sections */
+.leg { margin-bottom: 20px; }
+.leg-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: #8e8e93;
+  margin-bottom: 8px;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+@media (max-width: 640px) { .cards { grid-template-columns: 1fr; } }
+
+.card {
+  background: white;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.04);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 13px 14px 11px;
+  border-bottom: 1px solid #f2f2f7;
+}
+
+.route-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  padding: 5px 9px;
+  font-weight: 800;
+  font-size: 13px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  letter-spacing: 0.2px;
+}
+
+.card-info .route-name { font-size: 14px; font-weight: 600; line-height: 1.2; }
+.card-info .stop-name  { font-size: 11.5px; color: #8e8e93; margin-top: 2px; line-height: 1.3; }
+
+.feed-banner {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  font-size: 11.5px;
+  font-weight: 500;
+  border-bottom: 1px solid transparent;
+}
+.feed-banner.retrying {
+  display: flex;
+  background: #fff8ec;
+  border-color: #ffe0a3;
+  color: #7a4f00;
+}
+.feed-banner.lost {
+  display: flex;
+  background: #fff3f3;
+  border-color: #ffd0d0;
+  color: #9a1c1c;
+}
+.feed-banner .spinner {
+  width: 10px; height: 10px;
+  border: 2px solid #ffc44d;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.dep-row {
+  display: flex;
+  align-items: center;
+  padding: 9px 14px;
+  border-bottom: 1px solid #f2f2f7;
+  gap: 10px;
+}
+.dep-row:last-child { border-bottom: none; }
+.dep-row.no-gps { opacity: 0.55; }
+
+.min-block { min-width: 52px; text-align: right; flex-shrink: 0; }
+
+.min-val {
+  font-size: 26px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.5px;
+  font-variant-numeric: tabular-nums;
+}
+.min-unit { font-size: 13px; color: #8e8e93; font-weight: 500; margin-top: 1px; text-align: right; }
+
+.dep-detail { flex: 1; }
+
+.sched-time {
+  font-size: 16px;
+  font-weight: 500;
+  color: #3a3a3c;
+  font-variant-numeric: tabular-nums;
+}
+
+.delay-tag { font-size: 13px; margin-top: 3px; font-weight: 500; }
+.delay-tag.late   { color: #FF2D55; }
+.delay-tag.early  { color: #007AFF; }
+.delay-tag.ontime { color: #8e8e93; }
+.delay-tag.sched  { color: #aeaeb2; }
+
+.gps-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  min-width: 32px;
+}
+
+.occ-pills { display: flex; gap: 2px; align-items: center; }
+.occ-pill  { width: 8px; height: 5px; border-radius: 2.5px; flex-shrink: 0; }
+.occ-pill.empty { background: #e5e5ea; }
+
+.gps-tag { font-size: 12px; font-weight: 700; letter-spacing: 0.5px; }
+.gps-tag.live    { color: #30d158; }
+.gps-tag.inbound { color: #30d158; }
+.gps-tag.sched   { color: #aeaeb2; text-decoration: line-through; }
+
+.min-now   { color: #FF2D55; }
+.min-soon  { color: #ff9f0a; }
+.min-later { color: #1c1c1e; }
+
+.state-msg {
+  padding: 22px 14px;
+  text-align: center;
+  font-size: 13px;
+  color: #8e8e93;
+}
+.state-msg.error { color: #ff3b30; }
+
+footer {
+  margin-top: 14px;
+  font-size: 12px;
+  color: #aeaeb2;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.pulse-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #30d158;
+  flex-shrink: 0;
+}
+.pulse-dot.active { animation: pulse 2.5s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+
+/* Mode containers */
+#mode-home { display: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>Live Commute</h1>
+    <div class="subtitle" id="subtitle">Ballard → Northgate → NW Hospital</div>
+  </div>
+  <div class="header-right">
+    <div class="mode-toggle">
+      <button class="mode-btn active" id="btn-work" onclick="setMode('work')">To Work</button>
+      <button class="mode-btn"        id="btn-home" onclick="setMode('home')">To Home</button>
+    </div>
+    <button class="refresh-btn" id="refresh-btn" onclick="fetchAll()">↻ Refresh</button>
+  </div>
+</header>
+
+<!-- ══ TO WORK ══════════════════════════════════════════════════ -->
+<div id="mode-work">
+
+  <div class="leg">
+    <div class="leg-label">Ballard → Northgate</div>
+    <div class="cards">
+
+      <div class="card">
+        <div class="card-header">
+          <span class="route-badge" style="background:#1C6050;color:#fff;">40</span>
+          <div class="card-info">
+            <div class="route-name">Route 40</div>
+            <div class="stop-name">Leary Ave NW &amp; NW Dock Pl</div>
+          </div>
+        </div>
+        <div class="feed-banner" id="banner-40"></div>
+        <div id="deps-40"><div class="state-msg">Loading…</div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="leg">
+    <div class="leg-label">Northgate → NW Hospital</div>
+    <div class="cards">
+
+      <div class="card">
+        <div class="card-header">
+          <span class="route-badge" style="background:#1C6050;color:#fff;">345</span>
+          <div class="card-info">
+            <div class="route-name">Route 345</div>
+            <div class="stop-name">Meridian Ave N &amp; N Northgate Way</div>
+          </div>
+        </div>
+        <div class="feed-banner" id="banner-345"></div>
+        <div id="deps-345"><div class="state-msg">Loading…</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="route-badge" style="background:#1C6050;color:#fff;">365</span>
+          <div class="card-info">
+            <div class="route-name">Route 365</div>
+            <div class="stop-name">Meridian Ave N &amp; N Northgate Way</div>
+          </div>
+        </div>
+        <div class="feed-banner" id="banner-365"></div>
+        <div id="deps-365"><div class="state-msg">Loading…</div></div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /mode-work -->
+
+<!-- ══ TO HOME ══════════════════════════════════════════════════ -->
+<div id="mode-home">
+
+  <div class="leg">
+    <div class="leg-label">NW Hospital → Northgate</div>
+    <div class="cards">
+
+      <div class="card">
+        <div class="card-header">
+          <span class="route-badge" style="background:#1C6050;color:#fff;">345</span>
+          <div class="card-info">
+            <div class="route-name">Route 345</div>
+            <div class="stop-name">Northwest Hospital</div>
+          </div>
+        </div>
+        <div class="feed-banner" id="banner-h345"></div>
+        <div id="deps-h345"><div class="state-msg">Loading…</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="route-badge" style="background:#1C6050;color:#fff;">365</span>
+          <div class="card-info">
+            <div class="route-name">Route 365</div>
+            <div class="stop-name">Northwest Hospital</div>
+          </div>
+        </div>
+        <div class="feed-banner" id="banner-h365"></div>
+        <div id="deps-h365"><div class="state-msg">Loading…</div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="leg">
+    <div class="leg-label">Northgate → Ballard</div>
+    <div class="cards">
+
+      <div class="card">
+        <div class="card-header">
+          <span class="route-badge" style="background:#1C6050;color:#fff;">40</span>
+          <div class="card-info">
+            <div class="route-name">Route 40</div>
+            <div class="stop-name">N Northgate Way &amp; Meridian Ave N</div>
+          </div>
+        </div>
+        <div class="feed-banner" id="banner-h40"></div>
+        <div id="deps-h40"><div class="state-msg">Loading…</div></div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /mode-home -->
+
+<footer>
+  <div class="pulse-dot" id="pulse-dot"></div>
+  <span id="status-text">Fetching live data…</span>
+</footer>
+
+<script>
+const OBA         = 'https://api.pugetsound.onebusaway.org/api/where';
+const KEY         = 'TEST';
+const MAX_RETRIES = 3;
+const RETRY_MS    = 5000;
+const POLL_MS     = 30000;
+
+const STOPS_WORK = [
+  // Leg 1 — Ballard → Northgate
+  { id: '40',  stopId: '1_18152', filter: a => a.routeShortName === '40'  },
+  // Leg 2 — Northgate → NW Hospital
+  { id: '345', stopId: '1_17760', filter: a => a.routeShortName === '345' },
+  { id: '365', stopId: '1_17760', filter: a => a.routeShortName === '365' },
+];
+
+const STOPS_HOME = [
+  // Leg 1 — NW Hospital → Northgate
+  { id: 'h345', stopId: '1_16914', filter: a => a.routeShortName === '345' },
+  { id: 'h365', stopId: '1_16914', filter: a => a.routeShortName === '365' },
+  // Leg 2 — Northgate → Ballard
+  { id: 'h40',  stopId: '1_17755', filter: a => a.routeShortName === '40'  },
+];
+
+// Per-stop state keyed by stop id
+const S = {};
+[...STOPS_WORK, ...STOPS_HOME].forEach(s => {
+  S[s.id] = { data: null, retries: 0, timer: null };
+});
+
+let currentMode = 'work';
+let pollTimer   = null;
+
+// ── Mode switching ────────────────────────────────────────────────
+
+function setMode(mode) {
+  if (mode === currentMode) return;
+  currentMode = mode;
+
+  document.getElementById('mode-work').style.display = mode === 'work' ? 'block' : 'none';
+  document.getElementById('mode-home').style.display = mode === 'home' ? 'block' : 'none';
+  document.getElementById('btn-work').classList.toggle('active', mode === 'work');
+  document.getElementById('btn-home').classList.toggle('active', mode === 'home');
+  document.getElementById('subtitle').textContent = mode === 'work'
+    ? 'Ballard → Northgate → NW Hospital'
+    : 'NW Hospital → Northgate → Ballard';
+
+  // Cancel retry timers for the mode we're leaving
+  const leaving = mode === 'work' ? STOPS_HOME : STOPS_WORK;
+  leaving.forEach(stop => {
+    const s = S[stop.id];
+    if (s.timer) { clearTimeout(s.timer); s.timer = null; }
+  });
+
+  fetchAll();
+}
+
+// ── Rendering ────────────────────────────────────────────────────
+
+function fmtTime(ms) {
+  return new Date(ms).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+}
+
+function occupancyPills(a) {
+  const isHistorical = !a.occupancyStatus && !!a.historicalOccupancy;
+  const status = a.occupancyStatus || a.historicalOccupancy;
+  if (!status) return '';
+  let filled, color;
+  switch (status) {
+    case 'EMPTY':
+    case 'MANY_SEATS_AVAILABLE':      filled = 1; color = '#30d158'; break;
+    case 'FEW_SEATS_AVAILABLE':       filled = 2; color = '#ff9f0a'; break;
+    case 'STANDING_ROOM_ONLY':
+    case 'CRUSHED_STANDING_ROOM_ONLY':
+    case 'FULL':
+    case 'NOT_ACCEPTING_PASSENGERS':  filled = 3; color = '#ff3b30'; break;
+    default: return '';
+  }
+  if (isHistorical) color = '#8e8e93';
+  const pills = [1, 2, 3].map(i =>
+    `<span class="occ-pill ${i <= filled ? 'filled' : 'empty'}"${i <= filled ? ` style="background:${color}"` : ''}></span>`
+  ).join('');
+  return `<div class="occ-pills">${pills}</div>`;
+}
+
+function renderDeps(id, arrivals) {
+  const now = Date.now();
+  const el  = document.getElementById('deps-' + id);
+
+  // ponytail: prefer predicted entry over scheduled when OBA returns both for same tripId
+  const seen = new Map();
+  for (const a of arrivals) {
+    const existing = seen.get(a.tripId);
+    if (!existing || (a.predicted && !existing.predicted)) seen.set(a.tripId, a);
+  }
+  const deduped = [...seen.values()];
+
+  const upcoming = deduped.filter(a => {
+    const useMs = (a.predicted && a.predictedDepartureTime > 0)
+      ? a.predictedDepartureTime : a.scheduledDepartureTime;
+    return useMs - now > -120000;
+  }).slice(0, 4);
+
+  if (!upcoming.length) {
+    el.innerHTML = '<div class="state-msg">No upcoming trips in the next 90 min</div>';
+    return;
+  }
+
+  el.innerHTML = upcoming.map(a => {
+    const devSec = (a.tripStatus && a.tripStatus.scheduleDeviation) || 0;
+    const devMin = Math.round(devSec / 60);
+
+    const isLive = a.predicted
+      && a.predictedDepartureTime > 0
+      && a.tripStatus
+      && a.tripStatus.activeTripId === a.tripId
+      && (a.numberOfStopsAway > 0 || a.predictedDepartureTime - now <= 120000);
+
+    const isInbound = !isLive
+      && a.predicted
+      && a.predictedDepartureTime > 0
+      && a.tripStatus
+      && a.tripStatus.activeTripId !== a.tripId;
+
+    let useMs;
+    if (isLive) {
+      useMs = a.predictedDepartureTime;
+    } else if (isInbound) {
+      useMs = a.scheduledDepartureTime + devSec * 1000;
+    } else {
+      useMs = a.scheduledDepartureTime;
+    }
+
+    const mins       = Math.round((useMs - now) / 60000);
+    const minClass   = mins <= 4 ? 'min-now' : mins <= 10 ? 'min-soon' : 'min-later';
+    const minDisplay = mins <= 0 ? 'Now' : String(mins);
+    const minUnit    = mins <= 0 ? '' : 'min';
+
+    const timeDisplay = isLive
+      ? fmtTime(a.predictedDepartureTime)
+      : isInbound
+        ? '~' + fmtTime(a.scheduledDepartureTime + devSec * 1000)
+        : fmtTime(a.scheduledDepartureTime);
+
+    let delayHtml, gpsClass;
+    if (isLive) {
+      gpsClass = 'live';
+      if (Math.abs(devMin) <= 1) {
+        delayHtml = '<div class="delay-tag ontime">On time</div>';
+      } else if (devMin > 1) {
+        delayHtml = `<div class="delay-tag late">+${devMin} min late</div>`;
+      } else {
+        delayHtml = `<div class="delay-tag early">${Math.abs(devMin)} min early</div>`;
+      }
+    } else if (isInbound) {
+      gpsClass = 'inbound';
+      if (Math.abs(devMin) <= 1) {
+        delayHtml = '<div class="delay-tag ontime">Inbound</div>';
+      } else if (devMin > 1) {
+        delayHtml = `<div class="delay-tag late">+${devMin} min inbound</div>`;
+      } else {
+        delayHtml = `<div class="delay-tag early">${Math.abs(devMin)} min early inbound</div>`;
+      }
+    } else {
+      gpsClass = 'sched';
+      delayHtml = '<div class="delay-tag sched">Scheduled</div>';
+    }
+
+    return `
+      <div class="dep-row${gpsClass === 'sched' && mins > 1 ? ' no-gps' : ''}">
+        <div class="min-block">
+          <div class="min-val ${minClass}">${minDisplay}</div>
+          <div class="min-unit">${minUnit}</div>
+        </div>
+        <div class="dep-detail">
+          <div class="sched-time">${timeDisplay}</div>
+          ${delayHtml}
+        </div>
+        <div class="gps-block">
+          <div class="gps-tag ${gpsClass}">GPS</div>
+          ${occupancyPills(a)}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function setBanner(id, type, attempt) {
+  const el = document.getElementById('banner-' + id);
+  el.className = 'feed-banner';
+  if (!type) { el.style.display = 'none'; el.innerHTML = ''; return; }
+
+  if (type === 'retrying') {
+    el.classList.add('retrying');
+    el.innerHTML = `<div class="spinner"></div> Feed interrupted · retrying (${attempt}/${MAX_RETRIES})`;
+  } else {
+    el.classList.add('lost');
+    el.innerHTML = '⚠ Feed lost · showing last known data';
+  }
+}
+
+// ── Fetch with per-stop retry logic ──────────────────────────────
+
+async function fetchStop(stop) {
+  const s = S[stop.id];
+  if (s.timer) { clearTimeout(s.timer); s.timer = null; }
+  s.retries = 0;
+  setBanner(stop.id, null);
+
+  // ponytail: inner fn closes over s/stop so retries need no args and no isRetry flag
+  async function attempt() {
+    try {
+      const res  = await fetch(`${OBA}/arrivals-and-departures-for-stop/${stop.stopId}.json?key=${KEY}&minutesBefore=0&minutesAfter=90`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      s.data = json.data.entry.arrivalsAndDepartures.filter(stop.filter);
+      setBanner(stop.id, null);
+      renderDeps(stop.id, s.data);
+    } catch (e) {
+      if (++s.retries < MAX_RETRIES) {
+        setBanner(stop.id, 'retrying', s.retries);
+        if (s.data) renderDeps(stop.id, s.data);
+        s.timer = setTimeout(attempt, RETRY_MS);
+      } else if (s.data) {
+        setBanner(stop.id, 'lost');
+        renderDeps(stop.id, s.data);
+      } else {
+        document.getElementById('deps-' + stop.id).innerHTML =
+          '<div class="state-msg error">Could not load · check connection</div>';
+      }
+    }
+  }
+  return attempt();
+}
+
+// ── Global refresh ────────────────────────────────────────────────
+
+async function fetchAll() {
+  const btn   = document.getElementById('refresh-btn');
+  const dot   = document.getElementById('pulse-dot');
+  const stops = currentMode === 'work' ? STOPS_WORK : STOPS_HOME;
+
+  btn.disabled = true;
+  btn.textContent = '↻ Refreshing…';
+  dot.classList.remove('active');
+  document.getElementById('status-text').textContent = 'Refreshing…';
+
+  await Promise.allSettled(stops.map(s => fetchStop(s)));
+
+  btn.disabled = false;
+  btn.textContent = '↻ Refresh';
+  dot.classList.add('active');
+
+  const t = new Date().toLocaleTimeString('en-US', {
+    hour: 'numeric', minute: '2-digit', second: '2-digit'
+  });
+  document.getElementById('status-text').textContent = `Live · Updated ${t}`;
+
+  // Reset poll timer so it always counts from the last fetch
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(fetchAll, POLL_MS);
+}
+
+fetchAll();
+</script>
+</body>
+</html>
